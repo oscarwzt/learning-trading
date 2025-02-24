@@ -1,0 +1,14 @@
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+yfinance
+backtrader
+pyfolio
+sqlalchemy
+pymysql
+doltpy
+ipython
+jupyter
+plotly
