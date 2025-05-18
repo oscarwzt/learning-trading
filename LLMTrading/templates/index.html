@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chatbot UI</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body class="bg-dark text-white">
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Chatbot Interface</h2>
+      <div id="chat-log" class="border rounded p-3 bg-secondary" style="height: 400px; overflow-y: auto;">
+        <!-- Chat messages will appear here -->
+      </div>
+      <form id="chat-form" class="d-flex mt-3">
+        <input
+          type="text"
+          id="user-input"
+          name="user-message"
+          class="form-control me-2"
+          placeholder="Type your message..."
+          autocomplete="off"
+          required
+        />
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
+
+    <script>
+      const chatForm = document.getElementById("chat-form");
+      const chatLog = document.getElementById("chat-log");
+      const userInput = document.getElementById("user-input");
+
+      chatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        // Append the user's message
+        addMessage("user", message);
+
+        // Clear the input field
+        userInput.value = "";
+
+        // Start the streaming request
+        const formData = new FormData();
+        formData.append("user_message", message);
+
+        // Add a placeholder for the bot's message
+        addMessage("bot", "");
+
+        // Get the reference to the last bot message element
+        const botMessageElement = document.querySelector(".message.bot:last-child");
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/stream", true);
+        xhr.responseType = "text";
+
+        let aggregatedText = "";
+        xhr.onreadystatechange = function () {
+          // If in progress (readyState 3) or done (readyState 4)
+          if (xhr.readyState >= 3) {
+            aggregatedText = parseSSE(xhr.responseText);
+            botMessageElement.innerHTML = aggregatedText;
+            chatLog.scrollTop = chatLog.scrollHeight;
+          }
+        };
+        xhr.send(formData);
+      });
+
+      // Parse and aggregate SSE-like messages
+      function parseSSE(responseText) {
+        const lines = responseText.split("\n");
+        let text = "";
+        lines.forEach((line) => {
+          if (line.startsWith("data:")) {
+            text += line.replace("data:", "").trim();
+          }
+        });
+        return text;
+      }
+
+      // Helper to add a message to the chat log
+      function addMessage(sender, message) {
+        const messageEl = document.createElement("div");
+        messageEl.classList.add("message", sender, "mb-2", "p-2", "rounded");
+        messageEl.innerHTML = message;
+        chatLog.appendChild(messageEl);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

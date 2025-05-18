@@ -1,0 +1,25 @@
+body {
+    background-color: #121212;
+  }
+
+  #chat-log {
+    background-color: #1e1e1e;
+  }
+
+  /* Chat bubble for user messages */
+  .message.user {
+    background-color: #007bff;
+    color: #ffffff;
+    align-self: flex-end;
+    max-width: 80%;
+    margin-left: auto;
+  }
+
+  /* Chat bubble for bot messages */
+  .message.bot {
+    background-color: #343a40;
+    color: #ffffff;
+    align-self: flex-start;
+    max-width: 80%;
+    margin-right: auto;
+  }
